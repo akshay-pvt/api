@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eypz's Rest Api | V: 4.0 Pro</title>
+    <style>
+        :root {
+            --primary: #8b5cf6; --bg: #030303; --side: #0a0a0a; --card: #111;
+            --border: rgba(255,255,255,0.05); --text: #eee; --accent: #8b5cf6;
+        }
+
+        /* THEMES */
+        [data-theme="cyber"] { --primary: #00f2ff; --bg: #050505; --side: #080808; --card: #0d0d0d; --accent: #00f2ff; }
+        [data-theme="ruby"] { --primary: #ff004c; --bg: #0a0104; --side: #120106; --card: #1a0209; --accent: #ff004c; }
+        [data-theme="emerald"] { --primary: #00ff88; --bg: #010502; --side: #020a04; --card: #041207; --accent: #00ff88; }
+        [data-theme="gold"] { --primary: #ffcc00; --bg: #080700; --side: #0f0d00; --card: #171400; --accent: #ffcc00; }
+        [data-theme="ghost"] { --primary: #ffffff; --bg: #000000; --side: #050505; --card: #0a0a0a; --accent: #ffffff; }
+        [data-theme="nebula"] { --primary: #ff00ff; --bg: #050005; --side: #0a000a; --card: #120012; --accent: #ff00ff; }
+        [data-theme="ocean"] { --primary: #00a2ff; --bg: #000408; --side: #000810; --card: #000d1a; --accent: #00a2ff; }
+        [data-theme="ai"] { --primary: #7000ff; --bg: #020005; --side: #05000b; --card: #080012; --accent: #bc00ff; }
+        [data-theme="volcano"] { --primary: #ff4500; --bg: #0f0200; --side: #1a0400; --card: #260600; --accent: #ff4500; }
+        [data-theme="frost"] { --primary: #a5f3fc; --bg: #000a0f; --side: #00141f; --card: #001f2e; --accent: #a5f3fc; }
+        [data-theme="midnight"] { --primary: #3b82f6; --bg: #020617; --side: #0f172a; --card: #1e293b; --accent: #3b82f6; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .top-nav {
+            position: fixed; top: 0; width: 100%; height: 60px;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 2000;
+        }
+        .menu-trigger { background: var(--primary); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .logo { margin-left: 20px; font-weight: 900; letter-spacing: -1px; font-size: 1.2rem; color: var(--primary); }
+
+        .sidebar {
+            position: fixed; top: 60px; left: -300px; width: 280px; height: calc(100vh - 60px);
+            background: var(--side); border-right: 1px solid var(--border); padding: 25px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1900; overflow-y: auto;
+        }
+        .sidebar.open { left: 0; }
+        .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 1800; }
+        .side-overlay.active { display: block; animation: fadeIn 0.3s; }
+
+        .search-wrapper { margin-bottom: 30px; position: relative; }
+        .search-wrapper input {
+            width: 100%; background: var(--card); border: 1px solid var(--border);
+            padding: 15px 15px 15px 45px; border-radius: 12px; color: #fff; outline: none; transition: 0.3s;
+        }
+        .search-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(var(--primary), 0.2); }
+        .search-wrapper::before { content: '🔍'; position: absolute; left: 15px; top: 15px; opacity: 0.5; }
+
+        .main { margin-top: 80px; padding: 20px; max-width: 900px; margin-left: auto; margin-right: auto; transition: 0.4s; }
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; margin-bottom: 20px; opacity: 0; transform: translateY(20px);
+            animation: slideIn 0.5s forwards;
+            word-wrap: break-word;
+        }
+
+        .api-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; gap: 10px; }
+        .path { font-family: monospace; color: var(--primary); font-weight: bold; font-size: 0.9rem; }
+        .desc { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+        /* FIXED INPUT BOX FOR MOBILE */
+        .input-box { display: flex; gap: 10px; flex-wrap: wrap; }
+        .input-box input, .input-box select { 
+            flex: 1 1 200px; 
+            background: #000; border: 1px solid var(--border); padding: 12px; 
+            border-radius: 8px; color: #fff; outline: none; min-width: 0;
+        }
+        .input-box input[type="number"] { flex: 0 1 100px; }
+        .exe-btn { 
+            background: var(--primary); color: #000; border: none; padding: 0 25px; 
+            border-radius: 8px; font-weight: 900; cursor: pointer; height: 45px; 
+            flex: 1 1 100%; /* Makes button full width on small screens */
+        }
+
+        /* RESPONSE AREA MOBILE FIXES */
+        .res-area { margin-top: 15px; display: none; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #000; }
+        .res-head { 
+            background: #080808; padding: 10px; display: flex; flex-direction: column; 
+            gap: 8px; font-size: 0.7rem; 
+        }
+        .res-head-actions { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .url-display { opacity: 0.5; font-family: monospace; word-break: break-all; }
+        
+        pre { padding: 15px; color: #50fa7b; font-size: 0.85rem; overflow-x: auto; max-height: 400px; white-space: pre-wrap; word-break: break-all; }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .side-label { font-size: 0.65rem; text-transform: uppercase; color: #555; margin: 20px 0 10px; display: block; letter-spacing: 2px; }
+        
+        /* TABLET & DESKTOP ADJUSTMENTS */
+        @media (min-width: 600px) {
+            .exe-btn { flex: 0 0 auto; }
+            .res-head { flex-direction: row; justify-content: space-between; align-items: center; }
+            .res-head-actions { width: auto; }
+            pre { white-space: pre; }
+        }
+
+        select { width: 100%; background: #000; color: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="top-nav">
+    <button class="menu-trigger" onclick="toggleSide()">☰</button>
+    <div class="logo">EYPZ <span style="font-weight: 300; opacity: 0.5;">API</span></div>
+</div>
+
+<div class="side-overlay" onclick="toggleSide()"></div>
+
+<div class="sidebar" id="sidebar">
+    <span class="side-label">Server Configuration</span>
+    <select id="domBox"></select>
+
+    <span class="side-label">Visual Style</span>
+    <select onchange="setTheme(this.value)">
+        <option value="default">Amethyst</option>
+        <option value="cyber">Cyber Cyan</option>
+        <option value="ruby">Blood Ruby</option>
+        <option value="emerald">Emerald Forest</option>
+        <option value="gold">Luxury Gold</option>
+        <option value="ghost">Ghost</option>
+        <option value="nebula">Nebula</option>
+        <option value="ocean">Ocean</option>
+        <option value="ai">Neural AI</option>
+        <option value="volcano">Volcano Red</option>
+        <option value="frost">Arctic Frost</option>
+        <option value="midnight">Midnight Blue</option>
+    </select>
+
+    <span class="side-label">Endpoints</span>
+    <div id="cat-links"></div>
+</div>
+
+<div class="main">
+    <div class="search-wrapper">
+        <input type="text" id="apiSearch" placeholder="Search endpoints..." onkeyup="searchApi()">
+    </div>
+    <div id="api-list"></div>
+</div>
+
+<script>
+    let apiData = [];
+    let fullEndpoints = [];
+
+    function toggleSide() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.querySelector('.side-overlay').classList.toggle('active');
+    }
+
+    function setTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        if(window.innerWidth < 900) toggleSide();
+    }
+
+    async function bootstrap() {
+        try {
+            const r = await fetch('api.json');
+            const d = await r.json();
+            fullEndpoints = d.endpoints;
+            apiData = d.endpoints;
+
+            const doms = document.getElementById('domBox');
+            d.domains.forEach(host => {
+                let opt = document.createElement('option');
+                let protocol = (host.includes('localhost') || host.includes('127.0.0.1')) ? 'http://' : 'https://';
+                let cleanUrl = host.replace(/^https?:\/\//, '');
+                opt.value = `${protocol}${cleanUrl}`;
+                opt.innerText = host;
+                doms.appendChild(opt);
+            });
+
+            const cats = [...new Set(fullEndpoints.map(a => a.cat))];
+            const catContainer = document.getElementById('cat-links');
+            cats.forEach(c => {
+                catContainer.innerHTML += `<div style="padding:10px; cursor:pointer; font-size:0.9rem; color:#888" onclick="filterCat('${c}')">${c}</div>`;
+            });
+
+            render(apiData);
+        } catch(e) {
+            document.body.innerHTML = "<div style='padding:50px; text-align:center'>Config Failed.</div>";
+        }
+    }
+
+    function render(list) {
+        const container = document.getElementById('api-list');
+        container.innerHTML = '';
+        list.forEach((api, i) => {
+            let extraInputs = "";
+            if(api.hasLimit) {
+                extraInputs += `<input type="number" id="limit-${i}" placeholder="Limit" value="5" title="Result Limit">`;
+            }
+            if(api.extraParams) {
+                api.extraParams.forEach(ex => {
+                    if(ex.type === 'select') {
+                        extraInputs += `<select id="ex-${i}-${ex.key}">`;
+                        ex.options.forEach(opt => extraInputs += `<option value="${opt}">${opt}</option>`);
+                        extraInputs += `</select>`;
+                    }
+                });
+            }
+
+            container.innerHTML += `
+                <div class="card" style="animation-delay: ${i * 0.05}s">
+                    <div class="api-info">
+                        <div>
+                            <div class="path">GET ${api.path}</div>
+                            <div class="desc">${api.desc}</div>
+                        </div>
+                        <div style="font-size:0.6rem; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; white-space:nowrap">${api.cat}</div>
+                    </div>
+                    <div class="input-box">
+                        <input type="text" id="in-${i}" placeholder="${api.ph}">
+                        ${extraInputs}
+                        <button class="exe-btn" onclick="execute(${i})">RUN</button>
+                    </div>
+                    <div class="res-area" id="res-${i}">
+                        <div class="res-head">
+                            <span id="url-${i}" class="url-display"></span>
+                            <div class="res-head-actions">
+                                <span style="color:var(--primary); cursor:pointer; font-weight:bold" onclick="copy('code-${i}')">COPY JSON</span>
+                                <span style="color:#ff4444; cursor:pointer; font-weight:bold" onclick="document.getElementById('res-${i}').style.display='none'">HIDE</span>
+                            </div>
+                        </div>
+                        <pre id="code-${i}"></pre>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    async function execute(idx) {
+        const api = apiData[idx];
+        const val = document.getElementById(`in-${idx}`).value;
+        const host = document.getElementById('domBox').value;
+        if(!val) return;
+
+        let url = `${host}${api.path}?${api.param}=${encodeURIComponent(val)}`;
+        
+        const limitInput = document.getElementById(`limit-${idx}`);
+        if(limitInput) url += `&limit=${limitInput.value}`;
+
+        if(api.extraParams) {
+            api.extraParams.forEach(ex => {
+                const exVal = document.getElementById(`ex-${idx}-${ex.key}`).value;
+                url += `&${ex.key}=${encodeURIComponent(exVal)}`;
+            });
+        }
+
+        const resBox = document.getElementById(`res-${idx}`);
+        const codeBox = document.getElementById(`code-${idx}`);
+        resBox.style.display = 'block';
+        document.getElementById(`url-${idx}`).innerText = url;
+        codeBox.innerText = "{ \"status\": \"pending\" }";
+
+        try {
+            const r = await fetch(url);
+            const json = await r.json();
+            codeBox.innerText = JSON.stringify(json, null, 2);
+        } catch(e) {
+            codeBox.innerText = "{ \"error\": \"Connection Failed\" }";
+        }
+    }
+
+    function searchApi() {
+        const query = document.getElementById('apiSearch').value.toLowerCase();
+        apiData = fullEndpoints.filter(a => a.path.toLowerCase().includes(query) || a.desc.toLowerCase().includes(query));
+        render(apiData);
+    }
+
+    function filterCat(c) {
+        apiData = fullEndpoints.filter(a => a.cat === c);
+        render(apiData);
+        toggleSide();
+    }
+
+    function copy(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("JSON Copied!");
+        }).catch(err => {
+            // Fallback for older mobile browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert("JSON Copied!");
+        });
+    }
+
+    bootstrap();
+</script>
+</body>
+</html>

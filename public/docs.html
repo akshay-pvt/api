@@ -1,0 +1,42 @@
+{
+  "domains": [
+    "https://api.eypz.xo.je",
+    "https://api.eypz.great-site.net",
+    "https://api.eypz.gt.tc",
+    "https://api.eypz.gamer.gd",
+    "localhost:3000"
+  ],
+  "endpoints": [
+    { "cat": "AI", "path": "/api/publicai", "param": "q", "desc": "Neural AI Chatbot", "ph": "Ask anything..." },
+    { "cat": "AI", "path": "/api/generate-image", "param": "prompt", "desc": "generate-image", "ph": "prompt..." },
+    { 
+      "cat": "AI", 
+      "path": "/api/dolphin", 
+      "param": "question", 
+      "desc": "Dolphin AI Model", 
+      "ph": "Ask your question...",
+      "extraParams": [
+        { "key": "template", "type": "select", "options": ["logical", "creative", "summarize", "code-beginner", "code-advanced"] }
+      ]
+    },
+    { 
+      "cat": "AI", 
+      "path": "/api/ask-ai", 
+      "param": "prompt", 
+      "desc": "Deep-seek AI Model", 
+      "ph": "Ask your question...",
+      "extraParams": [
+        { "key": "model", "type": "select", "options": ["falsh", "think"] }
+      ]
+    },
+    { "cat": "Download", "path": "/api/spotify", "param": "q", "desc": "Spotify Downloader", "ph": "Song link or name..." },
+    { "cat": "Search", "path": "/api/spotify-search", "param": "q", "desc": "Spotify Search", "ph": "Song name..." },
+    { "cat": "Download", "path": "/api/ytdl", "param": "url", "desc": "YouTube Video & Audio", "ph": "YouTube link..." },
+    { "cat": "Download", "path": "/api/twitter", "param": "url", "desc": "X/Twitter Video DL", "ph": "Twitter link..." },
+    { "cat": "Download", "path": "/api/instagram", "param": "url", "desc": "Instagram Reels, Post", "ph": "Insta link..." },
+    { "cat": "Download", "path": "/api/pindl", "param": "url", "desc": "Pinterest Video/Image", "ph": "Pin link..." },
+    { "cat": "Download", "path": "/api/terabox", "param": "url", "desc": "Download Terabox Video", "ph": "Terabox link..." },
+    { "cat": "Search", "path": "/api/pin-search", "param": "q", "desc": "Pinterest Search", "ph": "Anime, tech, etc...", "hasLimit": true },
+    { "cat": "Search", "path": "/api/lyrics", "param": "query", "desc": "Lyrics Finder", "ph": "Song - Artist" }
+  ]
+}
